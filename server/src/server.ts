@@ -23,5 +23,13 @@ type Book = {
   owner: Owner;
   available: boolean;
   condition: Book_condition;
-  remaining_days: number;
+  remaining_days: number; // or datetime format of expiration date
 };
+
+// Connect DB
+const db = new sqlite3.Database("./library.db");
+
+// Create table
+db.run(''); // fill
+
+// api calls
