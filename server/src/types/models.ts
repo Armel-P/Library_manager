@@ -40,6 +40,8 @@ export enum History_Action {
   return_book = "return book",
   add_book = "add book",
   delete_book = "delete book",
+  create_owner = "create owner",
+  delete_owner = "delete owner",
   create_user = "create user",
   delete_user = "delete user",
   promote_user = "promote user",
@@ -53,4 +55,5 @@ export type History = {
   user: User;
   book?: Book;
   target_user?: User;
+  target_owner?: Owner;
 };
