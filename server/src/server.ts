@@ -595,7 +595,7 @@ app.post("/delete-book", authMiddleware, (req: Request, res: Response) => {
 
 // No parameter in body
 app.get("/late-borrowed-books", authMiddleware, (req: Request, res: Response) => {
-  db.all(
+  db.all<Book>(
     `SELECT *
     FROM books
     WHERE available = 0
