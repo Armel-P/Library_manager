@@ -529,7 +529,7 @@ app.post("/return-book", authMiddleware, (req: Request, res: Response) => {
         return res.status(409).json({ error: "Book is not currently borrowed" });
       db.run(
         `UPDATE books
-        SET available = 1, borrow_date = NULL
+        SET available = 1, borrow_date = NULL, borrower_mail = NULL
         WHERE isbn = ?`,
         [isbn],
         (err) => {
