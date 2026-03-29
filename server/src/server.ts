@@ -64,7 +64,7 @@ cron.schedule("0 0 * * *", () => {
   db.run(
     `DELETE
     FROM tokens
-    WHERE created_at <= DATE('now', '-1 days')`,
+    WHERE created_at <= datetime('now', '-1 day')`,
     (err) => {
       if (err)
         console.error("Token cleanup failed:", err);
@@ -106,8 +106,8 @@ app.post("/get-token", async (req: Request, res: Response) => {
           const newToken = jwt.sign({}, secretKey, { expiresIn: '2d' });
 
           db.run(
-            `INSERT INTO tokens (token, created_at, user) VALUES (?, ?, ?)`,
-            [newToken, new Date().toISOString().slice(0, 10), username],
+            `INSERT INTO tokens (token, created_at, user) VALUES (?, datetime('now'), ?)`,
+            [newToken, username],
             (err) => {
               if (err)
                 return res.status(500).json({ error: "Database error" });
@@ -167,8 +167,8 @@ app.post("/create-user", authMiddleware, async (req: Request, res: Response) => 
             return res.status(500).json({ error: "Database error" });
 
           db.run(
-            `INSERT INTO history (action, occurred_at, user, target_user) VALUES (?, ?, ?, ?)`,
-            [History_Action.create_user, new Date().toISOString(), req.user?.username, username],
+            `INSERT INTO history (action, occurred_at, user, target_user) VALUES (?, datetime('now'), ?, ?)`,
+            [History_Action.create_user, req.user?.username, username],
             (err) => {
               if (err)
                 console.error("Failed to insert history:", err);
@@ -226,8 +226,8 @@ app.post("/change-user-level", authMiddleware, async (req: Request, res: Respons
           const action = new_role === 1 ? History_Action.promote_user : History_Action.demote_user;
 
           db.run(
-            `INSERT INTO history (action, occurred_at, user, target_user) VALUES (?, ?, ?, ?)`,
-            [action, new Date().toISOString(), req.user?.username, username],
+            `INSERT INTO history (action, occurred_at, user, target_user) VALUES (?, datetime('now'), ?, ?)`,
+            [action, req.user?.username, username],
             (err) => {
               if (err)
                 console.error("Failed to insert history:", err);
@@ -269,8 +269,8 @@ app.post("/delete-user", authMiddleware, async (req: Request, res: Response) => 
             return res.status(500).json({ error: "Database error" });
 
           db.run(
-            `INSERT INTO history (action, occurred_at, user, target_user) VALUES (?, ?, ?, ?)`,
-            [History_Action.delete_user, new Date().toISOString(), req.user?.username, username],
+            `INSERT INTO history (action, occurred_at, user, target_user) VALUES (?, datetime('now'), ?, ?)`,
+            [History_Action.delete_user, req.user?.username, username],
             (err) => {
               if (err)
                 console.error("Failed to insert history:", err);
@@ -310,8 +310,8 @@ app.post("/create-owner", authMiddleware, (req: Request, res: Response) => {
             return res.status(500).json({ error: "Failed to retrieve created owner" });
   
           db.run(
-            `INSERT INTO history (action, occurred_at, user, target_owner) VALUES (?, ?, ?, ?)`,
-            [History_Action.create_owner, new Date().toISOString(), req.user?.username, owner.id],
+            `INSERT INTO history (action, occurred_at, user, target_owner) VALUES (?, datetime('now')?, ?, ?)`,
+            [History_Action.create_owner, req.user?.username, owner.id],
             (err) => {
               if (err)
                 console.error("Failed to insert history:", err);
@@ -382,8 +382,8 @@ app.post("/delete-owner", authMiddleware, (req: Request, res: Response) => {
             return res.status(500).json({ error: "Database error" });
 
           db.run(
-            `INSERT INTO history (action, occurred_at, user, target_owner) VALUES (?, ?, ?, ?)`,
-            [History_Action.delete_owner, new Date().toISOString(), req.user?.username, owner_id],
+            `INSERT INTO history (action, occurred_at, user, target_owner) VALUES (?, datetime('now'), ?, ?)`,
+            [History_Action.delete_owner, req.user?.username, owner_id],
             (err) => {
               if (err)
                 console.error("Failed to insert history:", err);
@@ -417,8 +417,8 @@ app.post("/add-book", authMiddleware, (req: Request, res: Response) => {
         return res.status(500).json({ error: "Database error" });
 
         db.run(
-            `INSERT INTO history (action, occurred_at, user, book_isbn) VALUES (?, ?, ?, ?)`,
-            [History_Action.add_book, new Date().toISOString(), req.user?.username, isbn],
+            `INSERT INTO history (action, occurred_at, user, book_isbn) VALUES (?, datetime('now'), ?, ?)`,
+            [History_Action.add_book, req.user?.username, isbn],
             (err) => {
               if (err)
                 console.error("Failed to insert history:", err);
@@ -485,16 +485,16 @@ app.post("/borrow-book", authMiddleware, (req: Request, res: Response) => {
         return res.status(409).json({ error: "Book is already borrowed" });
       db.run(
         `UPDATE books
-        SET available = 0, borrow_date = ?, borrower_mail = ?
+        SET available = 0, borrow_date = datetime('now'), borrower_mail = ?
         WHERE isbn = ?`,
-        [new Date().toISOString().slice(0, 10), borrower_mail, isbn],
+        [borrower_mail, isbn],
         (err) => {
           if (err)
             return res.status(500).json({ error: "Database error" });
 
           db.run(
-            `INSERT INTO history (action, occurred_at, user, book_isbn) VALUES (?, ?, ?, ?)`,
-            [History_Action.borrow_book, new Date().toISOString(), req.user?.username, isbn],
+            `INSERT INTO history (action, occurred_at, user, book_isbn) VALUES (?, datetime('now'), ?, ?)`,
+            [History_Action.borrow_book, req.user?.username, isbn],
             (err) => {
               if (err)
                 console.error("Failed to insert history:", err);
@@ -537,8 +537,8 @@ app.post("/return-book", authMiddleware, (req: Request, res: Response) => {
             return res.status(500).json({ error: "Database error" });
 
           db.run(
-            `INSERT INTO history (action, occurred_at, user, book_isbn) VALUES (?, ?, ?, ?)`,
-            [History_Action.return_book, new Date().toISOString(), req.user?.username, isbn],
+            `INSERT INTO history (action, occurred_at, user, book_isbn) VALUES (?, datetime('now'), ?, ?)`,
+            [History_Action.return_book, req.user?.username, isbn],
             (err) => {
               if (err)
                 console.error("Failed to insert history:", err);
@@ -578,8 +578,8 @@ app.post("/delete-book", authMiddleware, (req: Request, res: Response) => {
             return res.status(500).json({ error: "Database error" });
 
           db.run(
-            `INSERT INTO history (action, occurred_at, user, book_isbn) VALUES (?, ?, ?, ?)`,
-            [History_Action.delete_book, new Date().toISOString(), req.user?.username, isbn],
+            `INSERT INTO history (action, occurred_at, user, book_isbn) VALUES (?, datetime('now'), ?, ?)`,
+            [History_Action.delete_book, req.user?.username, isbn],
             (err) => {
               if (err)
                 console.error("Failed to insert history:", err);
@@ -599,7 +599,7 @@ app.post("/late-borrowed-books", authMiddleware, (req: Request, res: Response) =
     `SELECT *
     FROM books
     WHERE available = 0
-    AND borrow_date < DATE('now', '-14 days')`,
+    AND borrow_date < datetime('now', '-14 day')`,
     [],
     (err, books) => {
       if (err)
