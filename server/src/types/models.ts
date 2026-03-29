@@ -17,6 +17,7 @@ export type Book = {
   available: boolean;
   condition: Book_Condition;
   borrow_date: Date;
+  borrower_mail?: string;
 };
 
 export enum User_Role {admin = 1, user = 0}

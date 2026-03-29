@@ -464,9 +464,9 @@ app.get("/search-books", authMiddleware, (req: Request, res: Response) => {
   });
 });
 
-// Body contains isbn
+// Body contains isbn and borrower_mail
 app.post("/borrow-book", authMiddleware, (req: Request, res: Response) => {
-  const isbn = req.body["isbn"];
+  const {isbn, borrower_mail} = req.body;
 
   if (!isbn)
     return res.status(400).json({ error: "No isbn provided" });
@@ -485,9 +485,9 @@ app.post("/borrow-book", authMiddleware, (req: Request, res: Response) => {
         return res.status(409).json({ error: "Book is already borrowed" });
       db.run(
         `UPDATE books
-        SET available = 0, borrow_date = ?
+        SET available = 0, borrow_date = ?, borrower_mail = ?
         WHERE isbn = ?`,
-        [new Date().toISOString(), isbn],
+        [new Date().toISOString(), borrower_mail, isbn],
         (err) => {
           if (err)
             return res.status(500).json({ error: "Database error" });
