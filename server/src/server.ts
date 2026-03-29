@@ -107,7 +107,7 @@ app.post("/get-token", async (req: Request, res: Response) => {
 
           db.run(
             `INSERT INTO tokens (token, created_at, user) VALUES (?, ?, ?)`,
-            [newToken, new Date().toISOString(), username],
+            [newToken, new Date().toISOString().slice(0, 10), username],
             (err) => {
               if (err)
                 return res.status(500).json({ error: "Database error" });
@@ -326,7 +326,7 @@ app.post("/create-owner", authMiddleware, (req: Request, res: Response) => {
 });
 
 // Body contains either mail, name or lastname
-app.get("/search-owners", authMiddleware, (req: Request, res: Response) => {
+app.post("/search-owners", authMiddleware, (req: Request, res: Response) => {
   const { mail, name, lastname } = req.body;
   
   if (!mail && !name && !lastname)
@@ -430,9 +430,9 @@ app.post("/add-book", authMiddleware, (req: Request, res: Response) => {
 });
 
 // Body contains either isbn, title, author or owner_id
-app.get("/search-books", authMiddleware, (req: Request, res: Response) => {
+app.post("/search-books", authMiddleware, (req: Request, res: Response) => {
   const { isbn, title, author, owner_id } = req.body;
-  
+
   if (!isbn && !title && !author && !owner_id)
     return res.status(400).json({ error: "No isbn, title, author or owner_id provided" });
 
@@ -487,7 +487,7 @@ app.post("/borrow-book", authMiddleware, (req: Request, res: Response) => {
         `UPDATE books
         SET available = 0, borrow_date = ?, borrower_mail = ?
         WHERE isbn = ?`,
-        [new Date().toISOString(), borrower_mail, isbn],
+        [new Date().toISOString().slice(0, 10), borrower_mail, isbn],
         (err) => {
           if (err)
             return res.status(500).json({ error: "Database error" });
@@ -594,7 +594,7 @@ app.post("/delete-book", authMiddleware, (req: Request, res: Response) => {
 });
 
 // No parameter in body
-app.get("/late-borrowed-books", authMiddleware, (req: Request, res: Response) => {
+app.post("/late-borrowed-books", authMiddleware, (req: Request, res: Response) => {
   db.all<Book>(
     `SELECT *
     FROM books

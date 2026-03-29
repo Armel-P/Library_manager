@@ -21,6 +21,8 @@ var History_Action;
     History_Action["return_book"] = "return book";
     History_Action["add_book"] = "add book";
     History_Action["delete_book"] = "delete book";
+    History_Action["create_owner"] = "create owner";
+    History_Action["delete_owner"] = "delete owner";
     History_Action["create_user"] = "create user";
     History_Action["delete_user"] = "delete user";
     History_Action["promote_user"] = "promote user";
