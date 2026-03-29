@@ -398,7 +398,7 @@ app.post("/delete-owner", authMiddleware, (req: Request, res: Response) => {
 });
 
 // Body contains isbn, title, author, owner_id and condition (new, excellent, good, acceptable or bad)
-app.get("/add-book", authMiddleware, (req: Request, res: Response) => {
+app.post("/add-book", authMiddleware, (req: Request, res: Response) => {
   const { isbn, title, author, owner_id, condition } = req.body;
   const book_map: Record<string, number> = {
     "new": 3,
