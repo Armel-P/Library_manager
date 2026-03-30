@@ -3,57 +3,44 @@ use serde::Serialize;
 use std::sync::mpsc;
 
 #[derive(Clone, PartialEq)]
-pub enum BookCondition {
-    New,
-    Excellent,
-    Good,
-    Acceptable,
-    Bad,
+pub enum AdminLevel {
+    User,
+    Admin,
 }
 
-impl BookCondition {
+impl AdminLevel {
     pub fn as_str(&self) -> &'static str {
         match self {
-            BookCondition::New => "new",
-            BookCondition::Excellent => "excellent",
-            BookCondition::Good => "good",
-            BookCondition::Acceptable => "acceptable",
-            BookCondition::Bad => "bad",
+            AdminLevel::User => "user",
+            AdminLevel::Admin => "admin",
         }
     }
 
     pub fn label(&self) -> &'static str {
         match self {
-            BookCondition::New => "New",
-            BookCondition::Excellent => "Excellent",
-            BookCondition::Good => "Good",
-            BookCondition::Acceptable => "Acceptable",
-            BookCondition::Bad => "Bad",
+            AdminLevel::User => "User",
+            AdminLevel::Admin => "Admin",
         }
     }
 }
 
 #[derive(Serialize)]
-struct AddBookRequest {
-    isbn: String,
-    title: String,
-    author: String,
-    owner_id: i32,
-    condition: String,
+struct AddUserRequest {
+    username: String,
+    password: String,
+    user_level: String,
 }
 
-pub enum AddBookAction {
+pub enum AddUserAction {
     Back,
 }
 
-pub struct AddBookApp {
+pub struct AddUserApp {
     pub token: String,
 
-    isbn: String,
-    title: String,
-    author: String,
-    owner_id: String,
-    condition: BookCondition,
+    username: String,
+    password: String,
+    admin_level: AdminLevel,
 
     status: String,
     loading: bool,
@@ -61,21 +48,21 @@ pub struct AddBookApp {
     rx: Option<mpsc::Receiver<Result<String, String>>>,
 }
 
-impl AddBookApp {
+
+impl AddUserApp {
     pub fn new(token: String) -> Self {
         Self {
             token,
-            isbn: "".into(),
-            title: "".into(),
-            author: "".into(),
-            owner_id: "".into(),
-            condition: BookCondition::Good,
+            username: "".into(),
+            password: "".into(),
+            admin_level: AdminLevel::User,
             status: "".into(),
             loading: false,
             rx: None,
         }
     }
-        pub fn update(&mut self, ctx: &egui::Context) -> Option<AddBookAction> {
+
+        pub fn update(&mut self, ctx: &egui::Context) -> Option<AddUserAction> {
 
         // Receive async result
         let mut action = None;
@@ -90,25 +77,18 @@ impl AddBookApp {
             }
         }
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Add Book");
+            ui.heading("Add User");
 
-            ui.label("ISBN:");
-            ui.text_edit_singleline(&mut self.isbn);
-            ui.label("Titre:");
-            ui.text_edit_singleline(&mut self.title);
-            ui.label("Autheur:");
-            ui.text_edit_singleline(&mut self.author);
-            ui.label("Propriétaire:");
-            ui.text_edit_singleline(&mut self.owner_id);
-            ui.label("Condition:");
+            ui.label("Username:");
+            ui.text_edit_singleline(&mut self.username);
+            ui.label("Password:");
+            ui.text_edit_singleline(&mut self.password);
+            ui.label("User Level:");
             egui::ComboBox::from_label("")
-                .selected_text(self.condition.label())
+                .selected_text(self.admin_level.label())
                 .show_ui(ui, |ui| {
-                    ui.selectable_value(&mut self.condition, BookCondition::New, "New");
-                    ui.selectable_value(&mut self.condition, BookCondition::Excellent, "Excellent");
-                    ui.selectable_value(&mut self.condition, BookCondition::Good, "Good");
-                    ui.selectable_value(&mut self.condition, BookCondition::Acceptable, "Acceptable");
-                    ui.selectable_value(&mut self.condition, BookCondition::Bad, "Bad");
+                    ui.selectable_value(&mut self.admin_level, AdminLevel::User, AdminLevel::User.label());
+                    ui.selectable_value(&mut self.admin_level, AdminLevel::Admin, AdminLevel::Admin.label());
                 });
 
             if ui.button("Submit").clicked() && !self.loading {
@@ -120,12 +100,10 @@ impl AddBookApp {
 
                 let token = self.token.clone();
 
-                let req = AddBookRequest {
-                    isbn: self.isbn.clone(),
-                    title: self.title.clone(),
-                    author: self.author.clone(),
-                    owner_id: self.owner_id.parse().unwrap_or(0),
-                    condition: self.condition.as_str().to_string(),
+                let req = AddUserRequest {
+                    username: self.username.clone(),
+                    password: self.password.clone(),
+                    user_level: self.admin_level.as_str().to_string(),
                 };
 
                 std::thread::spawn(move || {
@@ -135,7 +113,7 @@ impl AddBookApp {
                         let client = reqwest::Client::new();
 
                         let res = client
-                            .post("http://88.175.41.67:8080/add-book")
+                            .post("http://88.175.41.67:8080/create-user")
                             .header("Authorization", format!("Bearer {}", token))
                             .json(&req)
                             .send()
@@ -163,7 +141,7 @@ impl AddBookApp {
             ui.separator();
 
             if ui.button("⬅ Back").clicked() {
-                action = Some(AddBookAction::Back);
+                action = Some(AddUserAction::Back);
             }
         });
 

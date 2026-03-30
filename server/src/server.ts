@@ -129,6 +129,11 @@ app.get("/check-token", authMiddleware, (req: Request, res: Response) => {
   return res.status(200).json({ message: "Token is valid" });
 });
 
+// No parameter in body
+app.get("/get-user-infos", authMiddleware, (req: Request, res: Response) => {
+  return res.status(200).json({ user: req.user });
+});
+
 // Body contains username, password and user_level (admin or user)
 app.post("/create-user", authMiddleware, async (req: Request, res: Response) => {
   if (req.user?.user_role != 1)

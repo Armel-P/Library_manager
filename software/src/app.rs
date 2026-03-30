@@ -9,19 +9,19 @@ enum SearchMode {
 }
 
 pub enum MainAction {
-    OpenAddBook,
+    OpenAccount,
     OpenBookDetails(Book),
 }
 
 #[derive(Deserialize, Clone)]
 pub struct Book {
-    pub isbn: String,              // ✅ added
+    pub isbn: String,
     pub title: String,
     pub author: String,
     pub owner_id: i32,
     pub available: i32,
-    pub condition: i32,            // ✅ added
-    pub borrow_date: Option<String>, // ✅ already correct
+    pub condition: i32,
+    pub borrow_date: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -146,10 +146,6 @@ impl MainApp {
                     self.fetch_books(None, None, None, None);
                 }
 
-                if ui.button("➕ Add Book").clicked() {
-                    action = Some(MainAction::OpenAddBook);
-                }
-
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     let notif_label = if self.late_books.is_empty() {
                         "🔔".to_string()
@@ -160,6 +156,10 @@ impl MainApp {
                     if ui.button(notif_label).clicked() {
                         self.fetch_late_books();
                         self.show_notifications = !self.show_notifications;
+                    }
+
+                    if ui.button("☰").clicked() {
+                        action = Some(MainAction::OpenAccount);
                     }
                 });
             });

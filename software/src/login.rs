@@ -49,7 +49,7 @@ impl Default for LoginApp {
 impl LoginApp {
     pub fn update(&mut self, ctx: &egui::Context) -> Option<String> {
 
-        // 🔁 Check async response
+        // Check async response
         if let Some(rx) = &self.rx {
             if let Ok(result) = rx.try_recv() {
                 self.loading = false;
@@ -83,7 +83,7 @@ impl LoginApp {
                         .password(true),
                 );
 
-                // 🎯 Enter key submits
+                // Enter key submits
                 let enter_pressed = ui.input(|i| i.key_pressed(egui::Key::Enter));
                 let enter_submit =
                     (username_resp.lost_focus() || password_resp.lost_focus()) && enter_pressed;
@@ -153,7 +153,7 @@ impl LoginApp {
             });
         });
 
-        // 🎯 Return token once (triggers screen switch)
+        // Return token once (triggers screen switch)
         self.token.take()
     }
 }
