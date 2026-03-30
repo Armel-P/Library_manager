@@ -64,7 +64,7 @@ cron.schedule("0 0 * * *", () => {
   db.run(
     `DELETE
     FROM tokens
-    WHERE created_at <= datetime('now', '-1 day')`,
+    WHERE datetime(created_at) <= datetime('now', '-1 day')`,
     (err) => {
       if (err)
         console.error("Token cleanup failed:", err);
@@ -336,15 +336,15 @@ app.post("/search-owners", authMiddleware, (req: Request, res: Response) => {
   const params: any[] = [];
 
   if (mail) {
-    query += ` AND mail = ?`;
+    query += ` AND mail LIKE ?`;
     params.push(mail);
   }
   if (name) {
-    query += ` AND name = ?`;
+    query += ` AND name LIKE ?`;
     params.push(name);
   }
   if (lastname) {
-    query += ` AND lastname = ?`;
+    query += ` AND lastname LIKE ?`;
     params.push(lastname);
   }
 
@@ -440,19 +440,19 @@ app.post("/search-books", authMiddleware, (req: Request, res: Response) => {
   const params: any[] = [];
 
   if (isbn) {
-    query += ` AND isbn = ?`;
+    query += ` AND isbn LIKE ?`;
     params.push(isbn);
   }
   if (title) {
-    query += ` AND title = ?`;
+    query += ` AND title LIKE ?`;
     params.push(title);
   }
   if (author) {
-    query += ` AND author = ?`;
+    query += ` AND author LIKE ?`;
     params.push(author);
   }
   if (owner_id) {
-    query += ` AND owner_id = ?`;
+    query += ` AND owner_id LIKE ?`;
     params.push(owner_id);
   }
 
@@ -599,7 +599,7 @@ app.post("/late-borrowed-books", authMiddleware, (req: Request, res: Response) =
     `SELECT *
     FROM books
     WHERE available = 0
-    AND borrow_date < datetime('now', '-14 day')`,
+    AND datetime(borrow_date) < datetime('now', '-14 day')`,
     [],
     (err, books) => {
       if (err)
