@@ -3,12 +3,14 @@ use eframe::egui;
 mod login;
 mod app;
 mod add_book;
+mod book_details;
 
 // 🔁 App state (which screen are we on?)
 enum AppState {
     Login(login::LoginApp),
     Main(app::MainApp),
     AddBook(add_book::AddBookApp),
+    BookDetails(book_details::BookDetailsApp),
 }
 
 struct MyApp {
@@ -42,11 +44,23 @@ impl eframe::App for MyApp {
                             self.state = AppState::AddBook(
                                 add_book::AddBookApp::new(main_app.token.clone())
                             );
-                        }
+                        },
+                        app::MainAction::OpenBookDetails(book) => {
+                            self.state = AppState::BookDetails(
+                                book_details::BookDetailsApp::new(book, main_app.token.clone())
+                            );
+                        },
                     }
                 }
             }
-
+            AppState::BookDetails(details_app) => {
+                if details_app.update(ctx) {
+                    // go back to main
+                    self.state = AppState::Main(
+                        app::MainApp::new(details_app.book.owner_id.to_string()) // ❗ see note below
+                    );
+                }
+            }
             AppState::AddBook(add_book_app) => {
                 if let Some(action) = add_book_app.update(ctx) {
                     match action {
