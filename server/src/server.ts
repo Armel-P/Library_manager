@@ -337,15 +337,15 @@ app.post("/search-owners", authMiddleware, (req: Request, res: Response) => {
 
   if (mail) {
     query += ` AND mail LIKE ?`;
-    params.push(mail);
+    params.push(`%${mail}%`);
   }
   if (name) {
     query += ` AND name LIKE ?`;
-    params.push(name);
+    params.push(`%${name}%`);
   }
   if (lastname) {
     query += ` AND lastname LIKE ?`;
-    params.push(lastname);
+    params.push(`%${lastname}%`);
   }
 
   db.all<Owner>(query, params, (err, owners) => {
@@ -439,21 +439,22 @@ app.post("/search-books", authMiddleware, (req: Request, res: Response) => {
   let query = `SELECT * FROM books WHERE 1=1`;
   const params: any[] = [];
 
+
   if (isbn) {
     query += ` AND isbn LIKE ?`;
-    params.push(isbn);
+    params.push(`%${isbn}%`);
   }
   if (title) {
     query += ` AND title LIKE ?`;
-    params.push(title);
+    params.push(`%${title}%`);
   }
   if (author) {
     query += ` AND author LIKE ?`;
-    params.push(author);
+    params.push(`%${author}%`);
   }
   if (owner_id) {
     query += ` AND owner_id LIKE ?`;
-    params.push(owner_id);
+    params.push(`%${owner_id}%`);
   }
 
   db.all<Book>(query, params, (err, books) => {
