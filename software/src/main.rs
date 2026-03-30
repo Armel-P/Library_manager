@@ -64,9 +64,8 @@ impl eframe::App for MyApp {
 
             AppState::BookDetails(details_app) => {
                 if details_app.update(ctx) {
-                    // go back to main
                     self.state = AppState::Main(
-                        app::MainApp::new(details_app.book.owner_id.to_string()) // ❗ see note below
+                        app::MainApp::new(details_app.token.clone())
                     );
                 }
             }
