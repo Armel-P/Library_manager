@@ -22,6 +22,7 @@ pub struct Book {
     pub available: i32,
     pub condition: i32,
     pub borrow_date: Option<String>,
+    pub borrower_mail: Option<String>,
 }
 
 #[derive(Deserialize)]

@@ -35,7 +35,8 @@ db.run(`CREATE TABLE IF NOT EXISTS books (
   owner_id INTEGER NOT NULL REFERENCES owners(id),
   available BOOLEAN NOT NULL DEFAULT 1,
   condition INTEGER NOT NULL,
-  borrow_date DATE NULL
+  borrow_date DATE NULL,
+  borrower_mail TEXT NULL
 )`);
 
 db.run(`CREATE TABLE IF NOT EXISTS users (

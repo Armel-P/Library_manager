@@ -1,6 +1,7 @@
 use eframe::egui;
 use crate::app::Book;
 use std::sync::mpsc;
+use chrono::Local;
 
 pub struct BookDetailsApp {
     pub book: Book,
@@ -30,8 +31,22 @@ impl BookDetailsApp {
                 self.loading = false;
 
                 match result {
-                    Ok(msg) => self.status = msg,
-                    Err(err) => self.status = format!("Error: {}", err),
+                    Ok(msg) => {
+                        if msg.contains("borrowed") {
+                            self.book.available = 0;
+                            self.book.borrow_date = Some(Local::now().to_rfc3339());
+                            self.book.borrower_mail = Some(self.borrower_mail.clone());
+                        } else if msg.contains("returned") {
+                            self.book.available = 1;
+                            self.book.borrow_date = None;
+                            self.book.borrower_mail = None;
+                            self.borrower_mail.clear(); // clear input field for next borrow
+                        }
+                        self.status = msg;
+                    }
+                    Err(err) => {
+                        self.status = format!("Error: {}", err);
+                    }
                 }
             }
         }
@@ -55,22 +70,33 @@ impl BookDetailsApp {
 
             ui.separator();
 
-            ui.heading("Borrow Book");
+            let is_borrowed = self.book.borrow_date.is_some();
 
-            ui.horizontal(|ui| {
-                ui.label("Borrower email:");
-                ui.text_edit_singleline(&mut self.borrower_mail);
-            });
+            if !is_borrowed {
+                ui.heading("Borrow Book");
+                ui.horizontal(|ui| {
+                    ui.label("Borrower email:");
+                    ui.text_edit_singleline(&mut self.borrower_mail);
+                });
+                if ui
+                    .add_enabled(!self.borrower_mail.is_empty() && !self.loading, egui::Button::new("📥 Borrow"))
+                    .clicked()
+                {
+                    self.borrow_book();
+                }
 
-            if ui
-                .add_enabled(!self.borrower_mail.is_empty() && !self.loading, egui::Button::new("Borrow"))
-                .clicked()
-            {
-                self.borrow_book();
+            } else {
+                ui.heading("Return Book");
+                if ui
+                    .add_enabled(!self.loading, egui::Button::new("📤 Return"))
+                    .clicked()
+                {
+                    self.return_book();
+                }
             }
 
             ui.label(if self.loading {
-                "⏳ Borrowing..."
+                "⏳ Processing..."
             } else {
                 &self.status
             });
@@ -111,7 +137,7 @@ impl BookDetailsApp {
                 let res = client
                     .post("http://88.175.41.67:8080/borrow-book")
                     .header("Authorization", format!("Bearer {}", token))
-                    .json(&BorrowRequest { isbn, borrower_mail })
+                    .json(&BorrowRequest { isbn, borrower_mail: borrower_mail.clone() })
                     .send()
                     .await;
 
@@ -119,9 +145,54 @@ impl BookDetailsApp {
                     Ok(resp) => {
                         let status = resp.status();
                         let text = resp.text().await.unwrap_or_default();
-
                         if status.is_success() {
-                            let _ = tx.send(Ok(format!("{}", text)));
+                            let _ = tx.send(Ok("Successfully borrowed book".into()));
+                        } else {
+                            let _ = tx.send(Err(text));
+                        }
+                    }
+                    Err(err) => {
+                        let _ = tx.send(Err(format!("Request failed: {}", err)));
+                    }
+                }
+            });
+        });
+    }
+
+    fn return_book(&mut self) {
+        self.loading = true;
+        self.status = "Returning book...".into();
+
+        let (tx, rx) = mpsc::channel();
+        self.rx = Some(rx);
+
+        let token = self.token.clone();
+        let isbn = self.book.isbn.clone();
+
+        std::thread::spawn(move || {
+            let rt = tokio::runtime::Runtime::new().unwrap();
+
+            rt.block_on(async move {
+                let client = reqwest::Client::new();
+
+                #[derive(serde::Serialize)]
+                struct ReturnRequest {
+                    isbn: String,
+                }
+
+                let res = client
+                    .post("http://88.175.41.67:8080/return-book")
+                    .header("Authorization", format!("Bearer {}", token))
+                    .json(&ReturnRequest { isbn })
+                    .send()
+                    .await;
+
+                match res {
+                    Ok(resp) => {
+                        let status = resp.status();
+                        let text = resp.text().await.unwrap_or_default();
+                        if status.is_success() {
+                            let _ = tx.send(Ok("Successfully returned book".into()));
                         } else {
                             let _ = tx.send(Err(text));
                         }
