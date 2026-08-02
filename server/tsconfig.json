@@ -5,7 +5,7 @@
     "module": "commonjs",
     "rootDir": "./src",
     "outDir": "./dist",
-    "types": [],
+    "types": ["node", "express"],
     "typeRoots": ["./src/types", "./node_modules/@types"],
   
     // Other Outputs

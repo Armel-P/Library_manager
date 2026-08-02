@@ -1,8 +1,11 @@
-declare namespace Express {
-  interface Request {
-    user?: {
-      username: string;
-      user_role: number;
-    };
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        username: string;
+      };
+    }
   }
 }
+
+export {};

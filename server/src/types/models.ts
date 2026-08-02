@@ -20,13 +20,21 @@ export type Book = {
   borrower_mail?: string;
 };
 
-export enum User_Role {admin = 1, user = 0}
+export type BookRow = {
+  isbn: string;
+  title: string;
+  author: string;
+  owner_id: number;
+  available: number;
+  condition: Book_Condition;
+  borrow_date: string | null;
+  borrower_mail?: string | null;
+};
 
 // User table
 export type User = {
-  username: string; //Use as ID, can't be both times the same username
+  username: string;
   password_hash: string;
-  user_role: User_Role;
 };
 
 // Token table
@@ -36,6 +44,12 @@ export type Token = {
   user: User;
 };
 
+export type TokenRow = {
+  token: string;
+  created_at: string;
+  username: string;
+};
+
 export enum History_Action {
   borrow_book = "borrow book",
   return_book = "return book",
@@ -43,10 +57,6 @@ export enum History_Action {
   delete_book = "delete book",
   create_owner = "create owner",
   delete_owner = "delete owner",
-  create_user = "create user",
-  delete_user = "delete user",
-  promote_user = "promote user",
-  demote_user = "demote user",
 }
 
 // History table
@@ -57,4 +67,14 @@ export type History = {
   book?: Book;
   target_user?: User;
   target_owner?: Owner;
+};
+
+export type HistoryRow = {
+  id: number;
+  action: History_Action;
+  occurred_at: string;
+  user: string;
+  book_isbn: string | null;
+  target_user: string | null;
+  target_owner: number | null;
 };

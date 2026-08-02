@@ -1,6 +1,6 @@
 import sqlite3 from "sqlite3";
 
-export const db = new sqlite3.Database("./library.db", (err) => {
+export const db = new sqlite3.Database("./library.db", (err: Error | null) => {
   if (err) {
     console.error("Failed to connect to database:", err);
     process.exit(1);
