@@ -79,7 +79,7 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:3000/user/create",
+					"raw": "localhost:3000/user/delete",
 					"host": [
 						"localhost"
 					],
