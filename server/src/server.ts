@@ -117,7 +117,7 @@ app.post("/user/create", adminKeyMiddleware, async (req: Request<{}, any, Create
           if (err)
             return res.status(500).json({ error: "Database error" });
 
-          return res.status(201).json({message: "User created successfully"});
+          return res.status(201).json({ message: "User created successfully" });
         }
       );
     }
