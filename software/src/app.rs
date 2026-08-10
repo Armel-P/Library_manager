@@ -1,6 +1,7 @@
 use eframe::egui;
 use serde::Deserialize;
 use std::sync::mpsc;
+use crate::theme::{Theme};
 
 #[derive(PartialEq)]
 enum SearchMode {
@@ -56,6 +57,8 @@ pub struct MainApp {
     pub loading: bool,
     pub status: String,
 
+    theme: Theme,
+
     rx_books: Option<mpsc::Receiver<Result<Vec<Book>, String>>>,
     rx_owners: Option<mpsc::Receiver<Result<Vec<Owner>, String>>>,
 
@@ -78,13 +81,15 @@ pub struct MainApp {
 }
 
 impl MainApp {
-    pub fn new(token: String) -> Self {
+    pub fn new(token: String, theme: Theme) -> Self {
     Self {
         token,
         books: vec![],
         owners: vec![],
         loading: false,
         status: "".into(),
+
+        theme: theme,
 
         rx_books: None,
         rx_owners: None,

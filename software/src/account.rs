@@ -21,10 +21,6 @@ struct UserResponse {
 
 pub enum AccountAction {
     Back,
-    OpenAddBook,
-    OpenAddOwner,
-    OpenAddUser,
-    OpenUserPrivilege,
 }
 
 pub struct AccountApp {
@@ -79,21 +75,18 @@ impl AccountApp {
 
             ui.separator();
 
-            if ui.button("➕ Add Book").clicked() {
-                action = Some(AccountAction::OpenAddBook);
-            }
+            // if ui.button("Add Book").clicked() {
+            //     action = Some(AccountAction::OpenAddBook);
+            // }
 
-            if ui.button("➕ Add Owner").clicked() {
-                action = Some(AccountAction::OpenAddOwner);
-            }
+            // if ui.button("Add Owner").clicked() {
+            //     action = Some(AccountAction::OpenAddOwner);
+            // }
 
-            if ui.button("👤 Add User").clicked() {
-                action = Some(AccountAction::OpenAddUser);
-            }
-
-            if ui.button("Promote/Demote User").clicked() {
-                action = Some(AccountAction::OpenUserPrivilege);
-            }
+            // if ui.button("Add User").clicked() {
+            //     action = Some(AccountAction::OpenAddUser);
+            // }
+            // Button redireect to sub window
 
             ui.separator();
 
