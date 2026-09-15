@@ -1,4 +1,4 @@
-pub static URL: &str = "http://localhost:3000/";
+pub static URL: &str = "";
 
 pub const HEADER_ADMIN_KEY: &str = "XAdminKey";
 pub const HEADER_TOKEN: &str = "token";

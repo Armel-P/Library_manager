@@ -37,9 +37,17 @@ Each side will have its own development documentation covering its internal stru
 
 ### Software side
 
-```bash
-cargo run
-```
+1. Change `constant.rs` URL value
+
+   ```
+   pub static URL: &str = "";
+   ```
+
+2. Launch cargo:
+
+    ```bash
+    cargo run
+    ```
 
 ## Future work
 
