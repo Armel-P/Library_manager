@@ -1,5 +1,4 @@
-mod structs;
-pub use structs::{LoginRequest, LoginResponse, CreateUserRequest, CreateUserResponse};
+pub mod structs;
 
 use reqwest::{header::{HeaderMap, HeaderName, HeaderValue}, Client, Method};
 use serde::{de::DeserializeOwned, Serialize};

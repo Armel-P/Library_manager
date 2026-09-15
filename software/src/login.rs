@@ -1,9 +1,9 @@
 use eframe::egui::{self, Pos2, Rect, Vec2, Stroke};
 use std::sync::mpsc;
 use reqwest::Method;
-use crate::constants::{ENDPOINT_CREATE_USER, ENDPOINT_LOGIN};
+use crate::constants::{HEADER_ADMIN_KEY, ENDPOINT_CREATE_USER, ENDPOINT_LOGIN};
 use crate::requests::{spawn_request,
-    LoginRequest, LoginResponse, CreateUserRequest, CreateUserResponse};
+    structs::{LoginRequest, LoginResponse, CreateUserRequest, CreateUserResponse}};
 use crate::theme::{Theme};
 
 #[derive(Clone, Copy, PartialEq)]
@@ -93,14 +93,12 @@ impl LoginApp {
 
             ui.allocate_ui_at_rect(
                 Rect::from_min_size(
-                    Pos2::new(full_rect.right() - 90.0, full_rect.top() + 10.0),
-                    Vec2::new(80.0, 24.0),
+                    Pos2::new(full_rect.right() - 70.0, full_rect.top() + 10.0),
+                    Vec2::new(80.0, 25.0),
                 ),
                 |ui| {
                     let label = self.theme.toggle_label();
-                    if ui.button(label).clicked() {
-                        self.theme.toggle();
-                    }
+                    if ui.button(label).clicked() { self.theme.toggle(); }
                 },
             );
 
@@ -174,7 +172,7 @@ impl LoginApp {
                                                 password: self.password.clone(),
                                             }),
                                             Some(vec![(
-                                                "XAdminKey".to_string(),
+                                                HEADER_ADMIN_KEY.to_string(),
                                                 self.admin_key.clone(),
                                             )]),
                                         );

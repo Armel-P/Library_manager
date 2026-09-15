@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import cron from "node-cron";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
@@ -8,8 +7,8 @@ import { initSchema } from "./db/schema";
 import { Owner, BookRow, User, TokenRow, History_Action} from "./types/models";
 import { LoginBody,
   CreateUserBody, DeleteUserBody,
-  CreateOwnerBody, SearchOwnerBody, DeleteOwnerBody,
-  CreateBookBody, SearchBookBody, BorrowBookBody, ReturnBookBody, DeleteBookBody, 
+  CreateOwnerBody, SampleOwnerBody, SearchOwnerBody, DeleteOwnerBody,
+  CreateBookBody, SampleBookBody, SearchBookBody, BorrowBookBody, ReturnBookBody, DeleteBookBody, 
   } from "./types/requests"
 import { createAuthMiddleware, createAdminKeyMiddleware } from "./middleware/auth"
 import { scheduleTokenCleanup } from "./jobs/cleanupTokens";
@@ -195,6 +194,44 @@ app.post("/owner/create", authMiddleware, (req: Request<{}, any, CreateOwnerBody
   );
 });
 
+app.post("/owner/count", authMiddleware, (req: Request, res: Response) => {
+  db.get<{ count: number }>(
+    `SELECT COUNT(*) AS count FROM owners`,
+    [],
+    (err: Error | null, row: { count: number }) => {
+      if (err)
+        return res.status(500).json({ error: "Database error" });
+
+      return res.status(200).json({ count: row.count });
+    }
+  );
+});
+
+app.post("/owner/sample", authMiddleware, (req: Request<{}, any, SampleOwnerBody>, res: Response) => {
+  const { begin, end } = req.body;
+
+  if (begin == null || end == null)
+    return res.status(400).json({ error: "No begin or end provided" });
+
+  if (begin < 0 || end < begin)
+    return res.status(400).json({ error: "Invalid begin or end" });
+
+  const size = end - begin;
+
+  db.all<Owner>(
+    `SELECT * FROM owners
+    LIMIT (?)
+    OFFSET (?)`,
+    [size, begin],
+    (err: Error | null, owners: Owner[]) => {
+      if (err)
+        return res.status(500).json({ error: "Database error" });
+
+      return res.status(200).json({ owners: owners });
+    }
+  );
+});
+
 app.post("/owner/search", authMiddleware, (req: Request<{}, any, SearchOwnerBody>, res: Response) => {
   const { mail, name, lastname } = req.body;
   
@@ -221,7 +258,7 @@ app.post("/owner/search", authMiddleware, (req: Request<{}, any, SearchOwnerBody
     if (err)
       return res.status(500).json({ error: "Database error" });
 
-    return res.status(200).json({ owners });
+    return res.status(200).json({ owners: owners });
   });
 });
 
@@ -268,6 +305,21 @@ app.post("/owner/delete", authMiddleware, (req: Request<{}, any, DeleteOwnerBody
 app.post("/book/create", authMiddleware, (req: Request<{}, any, CreateBookBody>, res: Response) => {
   const { isbn, title, author, owner_id, condition } = req.body;
 
+  if (isbn == null || title == null || author == null || owner_id == null || condition == null)
+    return res.status(400).json({ error: "No isbn, title, author, owner_id or condition provided" });
+
+  db.run(
+    `SELECT *
+    FROM owners
+    WHERE id = ?`,
+    [owner_id],
+    (err: Error | null, owner: Owner) => {
+      if (err)
+        return res.status(500).json({ error: "Database error" });
+      if (!owner)
+        return res.status(409).json({ error: "Owner doesn't exist" });
+    }
+  )
   db.run(
     `INSERT INTO books (isbn, title, author, owner_id, condition) VALUES (?, ?, ?, ?, ?)`,
     [isbn, title, author, owner_id, condition],
@@ -286,6 +338,44 @@ app.post("/book/create", authMiddleware, (req: Request<{}, any, CreateBookBody>,
           );
         }
     );
+});
+
+app.post("/book/count", authMiddleware, (req: Request, res: Response) => {
+  db.get<{ count: number }>(
+    `SELECT COUNT(*) AS count FROM books`,
+    [],
+    (err: Error | null, row: { count: number }) => {
+      if (err)
+        return res.status(500).json({ error: "Database error" });
+
+      return res.status(200).json({ count: row.count });
+    }
+  );
+});
+
+app.post("/book/sample", authMiddleware, (req: Request<{}, any, SampleBookBody>, res: Response) => {
+  const { begin, end } = req.body;
+
+  if (begin == null || end == null)
+    return res.status(400).json({ error: "No begin or end provided" });
+
+  if (begin < 0 || end < begin)
+    return res.status(400).json({ error: "Invalid begin or end" });
+
+  let size = end - begin;
+
+  db.all<BookRow>(
+    `SELECT * FROM books 
+    LIMIT (?)
+    OFFSET (?)`,
+    [size, begin],
+    (err: Error | null, books: BookRow[]) => {
+      if (err)
+        return res.status(500).json({ error: "Database error" });
+
+      return res.status(200).json({ books: books });
+    }
+  );
 });
 
 app.post("/book/search", authMiddleware, (req: Request<{}, any, SearchBookBody>, res: Response) => {
@@ -318,7 +408,7 @@ app.post("/book/search", authMiddleware, (req: Request<{}, any, SearchBookBody>,
     if (err)
       return res.status(500).json({ error: "Database error" });
 
-    return res.status(200).json({ books });
+    return res.status(200).json({ books: books });
   });
 });
 

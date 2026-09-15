@@ -35,9 +35,9 @@ export const initSchema = (db: Database) => {
     action TEXT NOT NULL,
     occurred_at DATE NOT NULL,
     user TEXT NOT NULL REFERENCES users(username),
-    book_isbn TEXT REFERENCES books(isbn),
+    book_isbn INTEGER REFERENCES books(isbn),
     target_user TEXT REFERENCES users(username),
-    target_owner TEXT REFERENCES owners(id)
+    target_owner INTEGER REFERENCES owners(id)
   )`);
 
   db.run(`CREATE TABLE IF NOT EXISTS admin_keys (

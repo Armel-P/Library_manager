@@ -34,6 +34,14 @@ export type CreateBookBody = {
     condition: number;
 };
 
+type sampleBody = {
+    begin: number;
+    end: number;
+}
+
+export type SampleOwnerBody = sampleBody;
+export type SampleBookBody = sampleBody;
+
 export type SearchBookBody = {
     isbn?: number;
     title?: string;
@@ -52,6 +60,3 @@ type BookID = {
 
 export type ReturnBookBody = BookID;
 export type DeleteBookBody = BookID;
-
-
-// etc.

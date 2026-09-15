@@ -10,7 +10,7 @@ export enum Book_Condition {new = 3, excellent = 2, good = 1, acceptable = 0, ba
 
 // Book table
 export type Book = {
-  isbn: string;
+  isbn: number;
   title: string;
   author: string;
   owner: Owner;
@@ -21,7 +21,7 @@ export type Book = {
 };
 
 export type BookRow = {
-  isbn: string;
+  isbn: number;
   title: string;
   author: string;
   owner_id: number;
@@ -74,7 +74,7 @@ export type HistoryRow = {
   action: History_Action;
   occurred_at: string;
   user: string;
-  book_isbn: string | null;
+  book_isbn: number | null;
   target_user: string | null;
   target_owner: number | null;
 };

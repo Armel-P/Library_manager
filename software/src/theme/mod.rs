@@ -1,8 +1,8 @@
-mod palette;
+pub mod palette;
 mod dark_purple;
 mod light_beige;
 
-pub use palette::Palette;
+use palette::Palette;
 use eframe::egui::{self, Visuals, Stroke};
 
 
